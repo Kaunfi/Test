@@ -1,0 +1,32 @@
+{// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SayGmBase {
+    mapping(address => uint256) private gmCount;
+    mapping(address => uint256) private lastGMTime;
+
+    event GMSent(address indexed sender, address indexed receiver, uint256 timestamp);
+
+    function sayGM() external {
+        require(block.timestamp >= lastGMTime[msg.sender] + 1 days, "Wait 24h before sending GM again");
+        gmCount[msg.sender] += 1;
+        lastGMTime[msg.sender] = block.timestamp;
+
+        emit GMSent(msg.sender, msg.sender, block.timestamp);
+    }
+
+    function sayGMTo(address to) external {
+        require(to != address(0), "Cannot send GM to zero address");
+        require(block.timestamp >= lastGMTime[msg.sender] + 1 days, "Wait 24h before sending GM again");
+
+        gmCount[to] += 1;
+        lastGMTime[msg.sender] = block.timestamp;
+
+        emit GMSent(msg.sender, to, block.timestamp);
+    }
+
+    function getGMCount(address user) external view returns (uint256) {
+        require(user != address(0), "Invalid address");
+        return gmCount[user];
+    }
+}
